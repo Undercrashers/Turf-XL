@@ -1,0 +1,19 @@
+target/
+*.class
+*.log
+.mvn/
+!.mvn/wrapper/maven-wrapper.jar
+HELP.md
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.classpath
+.project
+.settings/
+
+# Env
+application-local.yml
+application-local.properties
+.env

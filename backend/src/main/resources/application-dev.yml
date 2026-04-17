@@ -1,0 +1,41 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/turfxl_dev?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQLDialect
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: your-email@gmail.com
+    password: your-app-password
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+app:
+  jwt:
+    secret: CHANGE_ME_IN_PROD_this_is_only_for_local_development_turfxl_secret_key_2026
+    expiration-ms: 86400000   # 24h
+    issuer: turfxl-baisakhi
+
+  otp:
+    length: 6
+    expiry-seconds: 300
+    max-attempts: 5
+
+  cors:
+    allowed-origins: http://localhost:5173
