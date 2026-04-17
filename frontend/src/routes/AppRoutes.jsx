@@ -2,6 +2,7 @@ import { Routes, Route } from 'react-router-dom';
 import MainLayout from '../layouts/MainLayout.jsx';
 import AuthLayout from '../layouts/AuthLayout.jsx';
 import AdminLayout from '../layouts/AdminLayout.jsx';
+import DashboardLayout from '../layouts/DashboardLayout.jsx';
 import ProtectedRoute from './ProtectedRoute.jsx';
 import { ROLES } from '../constants/roles.js';
 
@@ -32,12 +33,14 @@ export default function AppRoutes() {
         <Route path="/complete-profile" element={<CompleteProfilePage />} />
       </Route>
 
-      {/* Protected (logged in users) */}
+      {/* Protected — dashboard-style pages */}
       <Route element={<ProtectedRoute />}>
-        <Route element={<MainLayout />}>
+        <Route element={<DashboardLayout />}>
           <Route path="/dashboard" element={<UserDashboardPage />} />
-          <Route path="/turfs/:turfId/book" element={<SlotBookingPage />} />
           <Route path="/my-bookings" element={<MyBookingsPage />} />
+        </Route>
+        <Route element={<MainLayout />}>
+          <Route path="/turfs/:turfId/book" element={<SlotBookingPage />} />
         </Route>
       </Route>
 

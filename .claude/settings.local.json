@@ -9,7 +9,11 @@
       "Bash(powershell *)",
       "Bash(sc query *)",
       "Bash(where mysql *)",
-      "Bash(mvn spring-boot:run -Dspring-boot.run.profiles=dev -q)"
+      "Bash(mvn spring-boot:run -Dspring-boot.run.profiles=dev -q)",
+      "Bash(curl -s -o /dev/null -w \"frontend %{http_code}\\\\n\" http://localhost:5173/)",
+      "Bash(curl -s -o /dev/null -w \"backend  %{http_code}\\\\n\" http://localhost:8080/api/v1/turfs)",
+      "Bash(curl -s -X POST -H \"Content-Type: application/json\" -d '{\"email\":\"test@example.com\"}' http://localhost:8080/api/v1/auth/request-otp)",
+      "Bash(curl *)"
     ]
   }
 }

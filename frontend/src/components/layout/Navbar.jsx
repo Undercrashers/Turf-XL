@@ -11,29 +11,46 @@ export default function Navbar() {
   };
 
   return (
-    <header className="bg-white border-b border-slate-200">
-      <nav className="container mx-auto flex items-center justify-between px-4 py-3">
-        <Link to="/" className="text-xl font-bold text-primary">
+    <nav className="fixed top-0 w-full z-50 bg-white/70 backdrop-blur-xl shadow-sm">
+      <div className="flex justify-between items-center px-6 py-4 max-w-7xl mx-auto">
+        <Link to="/" className="text-2xl font-black tracking-tighter text-primary-container font-headline">
           Turf XL
         </Link>
-        <div className="flex items-center gap-4 text-sm">
-          <Link to="/">Home</Link>
+        <div className="hidden md:flex items-center gap-8">
+          <Link to="/" className="text-on-surface-variant font-medium hover:text-primary transition-colors">Home</Link>
+          {isAuthenticated && (
+            <>
+              <Link to="/dashboard" className="text-on-surface-variant font-medium hover:text-primary transition-colors">Dashboard</Link>
+              <Link to="/my-bookings" className="text-on-surface-variant font-medium hover:text-primary transition-colors">My Bookings</Link>
+            </>
+          )}
+        </div>
+        <div className="flex items-center gap-4">
           {isAuthenticated ? (
             <>
-              <Link to="/dashboard">Dashboard</Link>
-              <Link to="/my-bookings">My Bookings</Link>
-              <span className="text-slate-500">{user?.name || user?.email}</span>
-              <button onClick={handleLogout} className="text-red-600">
+              <span className="hidden sm:inline text-sm text-secondary">{user?.name || user?.email}</span>
+              <button
+                onClick={handleLogout}
+                className="bg-gradient-primary text-on-primary px-6 py-2 rounded-full font-headline font-semibold shadow-lg shadow-primary/20 hover:scale-105 transition-transform"
+              >
                 Logout
               </button>
             </>
           ) : (
-            <Link to="/login" className="text-primary font-medium">
-              Login
-            </Link>
+            <>
+              <Link to="/login" className="text-on-surface-variant font-medium hover:text-primary transition-colors">
+                Login
+              </Link>
+              <Link
+                to="/login"
+                className="bg-gradient-primary text-on-primary px-6 py-2 rounded-full font-headline font-semibold shadow-lg shadow-primary/20 hover:scale-105 transition-transform"
+              >
+                Sign Up
+              </Link>
+            </>
           )}
         </div>
-      </nav>
-    </header>
+      </div>
+    </nav>
   );
 }
