@@ -1,7 +1,48 @@
-import { Link } from 'react-router-dom';
+import { useEffect, useMemo, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { FEATURED_TURFS } from '../features/turf/mockTurfs.js';
+import { turfApi } from '../api/turfApi.js';
+import { useAuth } from '../hooks/useAuth.js';
+
+const todayIso = () => new Date().toISOString().slice(0, 10);
 
 export default function HomePage() {
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
+  const [turfs, setTurfs] = useState([]);
+  const [turfsError, setTurfsError] = useState('');
+  const [selectedTurfId, setSelectedTurfId] = useState('');
+  const [sport, setSport] = useState('football');
+  const [date, setDate] = useState(todayIso());
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const data = await turfApi.list();
+        if (cancelled) return;
+        const list = Array.isArray(data) ? data : [];
+        setTurfs(list);
+        if (list.length) setSelectedTurfId(String(list[0].id));
+      } catch (err) {
+        if (!cancelled) setTurfsError(err?.response?.data?.message || 'Could not load venues');
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const selectedTurf = useMemo(
+    () => turfs.find((t) => String(t.id) === String(selectedTurfId)),
+    [turfs, selectedTurfId]
+  );
+
+  const handleSearch = () => {
+    if (!selectedTurfId) return;
+    navigate(`/turfs/${selectedTurfId}/book`, { state: { date, sport } });
+  };
+
   return (
     <>
       {/* Hero */}
@@ -60,12 +101,33 @@ export default function HomePage() {
                 </label>
                 <div className="flex items-center gap-3 bg-surface-container-lowest p-4 rounded-xl border border-outline-variant/30 focus-within:border-primary/40 transition-colors">
                   <span className="material-symbols-outlined text-secondary">location_on</span>
-                  <input
-                    className="bg-transparent border-none focus:ring-0 w-full text-on-surface placeholder:text-on-surface-variant/50 font-body outline-none"
-                    placeholder="e.g. Salt Lake, Kolkata"
-                    type="text"
-                  />
+                  <select
+                    value={selectedTurfId}
+                    onChange={(e) => setSelectedTurfId(e.target.value)}
+                    disabled={!turfs.length}
+                    className="bg-transparent border-none focus:ring-0 w-full text-on-surface font-body outline-none appearance-none cursor-pointer disabled:cursor-not-allowed"
+                  >
+                    {turfs.length === 0 && (
+                      <option value="">
+                        {turfsError ? 'Could not load venues' : 'Loading venues…'}
+                      </option>
+                    )}
+                    {turfs.map((t) => (
+                      <option key={t.id} value={t.id}>
+                        {t.name}
+                        {t.address ? ` — ${t.address}` : ''}
+                      </option>
+                    ))}
+                  </select>
+                  <span className="material-symbols-outlined text-on-surface-variant pointer-events-none">
+                    expand_more
+                  </span>
                 </div>
+                {selectedTurf && (
+                  <p className="font-body text-xs text-on-surface-variant pl-1">
+                    ₹{Number(selectedTurf.pricePerHour ?? 0).toLocaleString('en-IN')} / hour
+                  </p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -73,11 +135,27 @@ export default function HomePage() {
                   Sport
                 </label>
                 <div className="grid grid-cols-2 gap-3">
-                  <button className="flex items-center justify-center gap-2 p-3 rounded-xl bg-primary text-on-primary font-body font-medium transition-colors">
+                  <button
+                    type="button"
+                    onClick={() => setSport('football')}
+                    className={`flex items-center justify-center gap-2 p-3 rounded-xl font-body font-medium transition-colors ${
+                      sport === 'football'
+                        ? 'bg-primary text-on-primary'
+                        : 'bg-surface-container-highest text-on-surface hover:bg-surface-container'
+                    }`}
+                  >
                     <span className="material-symbols-outlined">sports_soccer</span>
                     Football
                   </button>
-                  <button className="flex items-center justify-center gap-2 p-3 rounded-xl bg-surface-container-highest text-on-surface hover:bg-surface-container transition-colors font-body font-medium">
+                  <button
+                    type="button"
+                    onClick={() => setSport('cricket')}
+                    className={`flex items-center justify-center gap-2 p-3 rounded-xl font-body font-medium transition-colors ${
+                      sport === 'cricket'
+                        ? 'bg-primary text-on-primary'
+                        : 'bg-surface-container-highest text-on-surface hover:bg-surface-container'
+                    }`}
+                  >
                     <span className="material-symbols-outlined">sports_cricket</span>
                     Cricket
                   </button>
@@ -92,12 +170,19 @@ export default function HomePage() {
                   <span className="material-symbols-outlined text-secondary">calendar_month</span>
                   <input
                     type="date"
+                    value={date}
+                    min={todayIso()}
+                    onChange={(e) => setDate(e.target.value)}
                     className="bg-transparent border-none focus:ring-0 w-full text-on-surface font-body cursor-pointer outline-none"
                   />
                 </div>
               </div>
 
-              <button className="w-full bg-tertiary-fixed-dim text-on-tertiary-fixed-variant py-4 rounded-xl font-headline font-bold text-lg hover:brightness-105 transition-all shadow-lg shadow-tertiary/10 mt-4">
+              <button
+                onClick={handleSearch}
+                disabled={!selectedTurfId}
+                className="w-full bg-tertiary-fixed-dim text-on-tertiary-fixed-variant py-4 rounded-xl font-headline font-bold text-lg hover:brightness-105 transition-all shadow-lg shadow-tertiary/10 mt-4 disabled:opacity-60 disabled:cursor-not-allowed"
+              >
                 Search Availability
               </button>
             </div>

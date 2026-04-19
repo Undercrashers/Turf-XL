@@ -18,12 +18,8 @@ export default function Navbar() {
         </Link>
         <div className="hidden md:flex items-center gap-8">
           <Link to="/" className="text-on-surface-variant font-medium hover:text-primary transition-colors">Home</Link>
-          {isAuthenticated && (
-            <>
-              <Link to="/dashboard" className="text-on-surface-variant font-medium hover:text-primary transition-colors">Dashboard</Link>
-              <Link to="/my-bookings" className="text-on-surface-variant font-medium hover:text-primary transition-colors">My Bookings</Link>
-            </>
-          )}
+          <Link to="/dashboard" className="text-on-surface-variant font-medium hover:text-primary transition-colors">Dashboard</Link>
+          <Link to="/my-bookings" className="text-on-surface-variant font-medium hover:text-primary transition-colors">My Bookings</Link>
         </div>
         <div className="flex items-center gap-4">
           {isAuthenticated ? (
