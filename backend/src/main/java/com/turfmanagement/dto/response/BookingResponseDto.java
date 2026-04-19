@@ -23,5 +23,6 @@ public class BookingResponseDto {
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private BigDecimal totalAmount;
+    private String sport;
     private BookingStatus status;
 }

@@ -145,6 +145,14 @@ export default function MyBookingsPage() {
                 <div className="flex-1 w-full space-y-4">
                   <div className="flex justify-between items-start gap-4">
                     <div>
+                      {b.sport && (
+                        <div className="inline-flex items-center gap-1 bg-primary-container/20 text-primary px-2 py-0.5 rounded-full font-label text-xs font-bold uppercase tracking-wider mb-2">
+                          <span className="material-symbols-outlined text-[14px]">
+                            {b.sport === 'cricket' ? 'sports_cricket' : 'sports_soccer'}
+                          </span>
+                          {b.sport}
+                        </div>
+                      )}
                       <h3 className="font-headline font-semibold text-2xl text-on-surface mb-1">
                         {b.turfName}
                       </h3>

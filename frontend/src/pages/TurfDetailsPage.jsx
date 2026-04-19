@@ -1,12 +1,33 @@
-import { Link, useParams } from 'react-router-dom';
+import { useMemo, useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { getTurfById } from '../features/turf/mockTurfs.js';
+import { bookingApi } from '../api/bookingApi.js';
+import { useAuth } from '../hooks/useAuth.js';
 
-const DATES = [
-  { label: 'Today', day: '14', active: true },
-  { label: 'Tue', day: '15' },
-  { label: 'Wed', day: '16' },
-  { label: 'Thu', day: '17' },
-];
+const DAY_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+function buildDateOptions(count = 4) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return Array.from({ length: count }).map((_, i) => {
+    const d = new Date(today);
+    d.setDate(d.getDate() + i);
+    return {
+      iso: d.toISOString().slice(0, 10),
+      label: i === 0 ? 'Today' : DAY_SHORT[d.getDay()],
+      day: String(d.getDate()),
+    };
+  });
+}
+
+function slotRangeToBackendLabel(range) {
+  const [start] = range.split('-').map((s) => s.trim());
+  const [hStr, m] = start.split(':');
+  const h = parseInt(hStr, 10);
+  const period = h >= 12 ? 'PM' : 'AM';
+  const h12 = ((h + 11) % 12) + 1;
+  return `${h12}:${m} ${period}`;
+}
 
 function Stars({ value }) {
   return (
@@ -38,7 +59,24 @@ function Stars({ value }) {
 
 export default function TurfDetailsPage() {
   const { turfId } = useParams();
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
   const turf = getTurfById(turfId);
+
+  const dateOptions = useMemo(() => buildDateOptions(4), []);
+  const firstAvailableSlot = useMemo(
+    () => turf?.slots?.find((s) => s.available)?.time ?? '',
+    [turf]
+  );
+
+  const [selectedDate, setSelectedDate] = useState(dateOptions[0].iso);
+  const [selectedSlot, setSelectedSlot] = useState(firstAvailableSlot);
+  const [sport, setSport] = useState('football');
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
+
+  const sportPricing = turf?.sportPricing ?? { football: turf?.price ?? 0 };
+  const currentPrice = sportPricing[sport] ?? turf?.price ?? 0;
 
   if (!turf) {
     return (
@@ -59,16 +97,40 @@ export default function TurfDetailsPage() {
     );
   }
 
+  const handleBook = async () => {
+    setError('');
+    if (!isAuthenticated) {
+      navigate('/login');
+      return;
+    }
+    const slot = turf.slots.find((s) => s.time === selectedSlot);
+    if (!slot || !slot.available) {
+      setError('Please pick an available time.');
+      return;
+    }
+    try {
+      setSubmitting(true);
+      await bookingApi.create({
+        turfId: Number(turf.id),
+        slotLabel: slotRangeToBackendLabel(slot.time),
+        bookingDate: selectedDate,
+        amount: currentPrice,
+        sport,
+      });
+      navigate('/my-bookings');
+    } catch (err) {
+      setError(err?.response?.data?.message || 'Could not save booking. Try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
     <main className="pt-8 pb-32">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Hero */}
         <section className="mb-12 relative rounded-[2rem] overflow-hidden bg-surface-container-low h-[614px] min-h-[400px]">
-          <img
-            alt=""
-            className="absolute inset-0 w-full h-full object-cover"
-            src={turf.image}
-          />
+          <img alt="" className="absolute inset-0 w-full h-full object-cover" src={turf.image} />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />
 
           <div className="absolute bottom-8 left-8 right-8 md:right-auto md:w-[480px] p-8 rounded-3xl glass-panel text-on-surface">
@@ -159,7 +221,7 @@ export default function TurfDetailsPage() {
             <div className="sticky top-24 bg-surface-container-lowest p-8 rounded-3xl shadow-ambient border border-outline-variant/15">
               <div className="flex justify-between items-baseline mb-6">
                 <h3 className="text-3xl font-bold font-headline text-on-surface tracking-tight">
-                  ₹{turf.price.toLocaleString('en-IN')}
+                  ₹{currentPrice.toLocaleString('en-IN')}
                   <span className="text-lg text-secondary font-medium font-body">/hour</span>
                 </h3>
                 <span className="text-sm font-bold text-primary bg-primary-container/10 px-3 py-1 rounded-full font-label uppercase tracking-widest">
@@ -169,54 +231,102 @@ export default function TurfDetailsPage() {
 
               <div className="mb-6">
                 <label className="block text-sm font-medium text-on-surface-variant mb-3">
-                  Select Date
+                  Sport
                 </label>
-                <div className="flex gap-2 overflow-x-auto pb-2 -mx-2 px-2 no-scrollbar">
-                  {DATES.map((d) => (
-                    <button
-                      key={d.day}
-                      className={`flex-shrink-0 w-16 p-3 rounded-2xl text-center transition-colors ${
-                        d.active
-                          ? 'bg-primary text-on-primary'
-                          : 'bg-surface-container-low hover:bg-surface-container text-on-surface'
-                      }`}
-                    >
-                      <div className={`text-xs mb-1 ${d.active ? 'opacity-80' : 'text-secondary'}`}>
-                        {d.label}
-                      </div>
-                      <div className="text-xl font-bold font-headline">{d.day}</div>
-                    </button>
-                  ))}
+                <div className="grid grid-cols-2 gap-3">
+                  {Object.keys(sportPricing).map((s) => {
+                    const active = sport === s;
+                    const icon = s === 'cricket' ? 'sports_cricket' : 'sports_soccer';
+                    return (
+                      <button
+                        key={s}
+                        type="button"
+                        onClick={() => setSport(s)}
+                        className={`flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-medium transition-colors ${
+                          active
+                            ? 'bg-primary text-on-primary'
+                            : 'bg-surface-container-low hover:bg-surface-container text-on-surface'
+                        }`}
+                      >
+                        <span className="material-symbols-outlined text-[20px]">{icon}</span>
+                        <span className="capitalize">{s}</span>
+                        <span
+                          className={`text-xs ${active ? 'opacity-80' : 'text-on-surface-variant'}`}
+                        >
+                          ₹{sportPricing[s].toLocaleString('en-IN')}
+                        </span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
-              <div className="mb-8">
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-on-surface-variant mb-3">
+                  Select Date
+                </label>
+                <div className="flex gap-2 overflow-x-auto pb-2 -mx-2 px-2 no-scrollbar">
+                  {dateOptions.map((d) => {
+                    const active = d.iso === selectedDate;
+                    return (
+                      <button
+                        key={d.iso}
+                        type="button"
+                        onClick={() => setSelectedDate(d.iso)}
+                        className={`flex-shrink-0 w-16 p-3 rounded-2xl text-center transition-colors ${
+                          active
+                            ? 'bg-primary text-on-primary'
+                            : 'bg-surface-container-low hover:bg-surface-container text-on-surface'
+                        }`}
+                      >
+                        <div className={`text-xs mb-1 ${active ? 'opacity-80' : 'text-secondary'}`}>
+                          {d.label}
+                        </div>
+                        <div className="text-xl font-bold font-headline">{d.day}</div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="mb-6">
                 <label className="block text-sm font-medium text-on-surface-variant mb-3">
                   Available Times
                 </label>
                 <div className="grid grid-cols-2 gap-3">
-                  {turf.slots.map((s) => (
-                    <button
-                      key={s.time}
-                      disabled={!s.available}
-                      className={`py-3 px-4 rounded-xl text-sm font-medium transition-colors border ${
-                        s.available
-                          ? 'bg-surface-container-low hover:bg-surface-container text-on-surface border-transparent hover:border-outline-variant/30'
-                          : 'bg-surface-container-high text-on-surface-variant opacity-50 cursor-not-allowed line-through border-transparent'
-                      }`}
-                    >
-                      {s.time}
-                    </button>
-                  ))}
+                  {turf.slots.map((s) => {
+                    const active = s.time === selectedSlot;
+                    return (
+                      <button
+                        key={s.time}
+                        type="button"
+                        disabled={!s.available}
+                        onClick={() => setSelectedSlot(s.time)}
+                        className={`py-3 px-4 rounded-xl text-sm font-medium transition-colors border ${
+                          !s.available
+                            ? 'bg-surface-container-high text-on-surface-variant opacity-50 cursor-not-allowed line-through border-transparent'
+                            : active
+                            ? 'bg-primary text-on-primary border-transparent'
+                            : 'bg-surface-container-low hover:bg-surface-container text-on-surface border-transparent hover:border-outline-variant/30'
+                        }`}
+                      >
+                        {s.time}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
-              <Link
-                to={`/turfs/${turf.id}/book`}
-                className="block text-center w-full py-4 rounded-xl bg-gradient-primary text-on-primary font-bold text-lg tracking-wide shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all duration-300"
+              {error && <p className="text-sm text-error mb-3 text-center">{error}</p>}
+
+              <button
+                type="button"
+                onClick={handleBook}
+                disabled={submitting || !selectedSlot}
+                className="block text-center w-full py-4 rounded-xl bg-gradient-primary text-on-primary font-bold text-lg tracking-wide shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                Book Now
-              </Link>
+                {submitting ? 'Booking…' : isAuthenticated ? 'Book Now' : 'Login to Book'}
+              </button>
               <p className="text-center text-xs text-secondary mt-4">
                 Free cancellation up to 24 hours before.
               </p>

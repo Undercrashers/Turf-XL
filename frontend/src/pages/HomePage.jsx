@@ -43,6 +43,10 @@ export default function HomePage() {
     navigate(`/turfs/${selectedTurfId}/book`, { state: { date, sport } });
   };
 
+  const primaryCtaTarget = isAuthenticated
+    ? `/turfs/${selectedTurfId || (turfs[0]?.id ?? 1)}/book`
+    : '/login';
+
   return (
     <>
       {/* Hero */}
@@ -76,7 +80,7 @@ export default function HomePage() {
             </p>
             <div className="flex flex-wrap items-center gap-4">
               <Link
-                to="/login"
+                to={primaryCtaTarget}
                 className="bg-gradient-primary text-on-primary px-8 py-4 rounded-full font-headline font-semibold text-lg shadow-xl shadow-primary/30 hover:scale-105 transition-all duration-300"
               >
                 Book Your Slot Now

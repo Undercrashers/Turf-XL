@@ -34,6 +34,8 @@ public class Booking extends BaseEntity {
     @Column(precision = 10, scale = 2)
     private BigDecimal totalAmount;
 
+    private String sport;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private BookingStatus status = BookingStatus.PENDING;

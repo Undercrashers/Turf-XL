@@ -20,4 +20,6 @@ public class BookingCreateDto {
 
     @NotNull
     private BigDecimal amount;
+
+    private String sport;
 }

@@ -51,6 +51,11 @@ public class BookingServiceImpl implements BookingService {
         LocalDateTime start = LocalDateTime.of(date, startTime);
         LocalDateTime end = start.plusHours(1);
 
+        if (bookingRepository.existsByTurfIdAndSlot_StartTimeAndStatus(
+                turf.getId(), start, BookingStatus.CONFIRMED)) {
+            throw new BadRequestException("This slot is already booked. Please pick another time.");
+        }
+
         Slot slot = slotRepository.save(Slot.builder()
                 .turf(turf)
                 .startTime(start)
@@ -63,6 +68,7 @@ public class BookingServiceImpl implements BookingService {
                 .turf(turf)
                 .slot(slot)
                 .totalAmount(dto.getAmount())
+                .sport(dto.getSport())
                 .status(BookingStatus.CONFIRMED)
                 .build());
 
