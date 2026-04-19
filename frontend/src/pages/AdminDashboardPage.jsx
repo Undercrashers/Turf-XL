@@ -86,7 +86,7 @@ export default function AdminDashboardPage() {
             </div>
             <div>
               <p className="font-body text-primary-fixed font-medium text-sm">Platform Revenue</p>
-              <h3 className="font-headline font-bold text-4xl tracking-tight mt-1">$42.5k</h3>
+              <h3 className="font-headline font-bold text-4xl tracking-tight mt-1">₹42.5k</h3>
             </div>
           </div>
         </div>

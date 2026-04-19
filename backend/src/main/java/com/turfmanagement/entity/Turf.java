@@ -33,6 +33,7 @@ public class Turf extends BaseEntity {
     @Column(precision = 10, scale = 2)
     private BigDecimal pricePerHour;
 
+    @Column(length = 2048)
     private String coverImageUrl;
 
     @Column(nullable = false)

@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import { bookingApi } from '../api/bookingApi.js';
+import { getTurfById } from '../features/turf/mockTurfs.js';
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
@@ -14,23 +16,53 @@ const DATE_GRID = [
 ];
 
 const SLOTS = [
-  { time: '5:00 PM', duration: '60 mins', price: 45, status: 'booked' },
-  { time: '6:00 PM', duration: '60 mins', price: 60, status: 'available' },
-  { time: '7:00 PM', duration: '60 mins', price: 60, status: 'available' },
-  { time: '8:00 PM', duration: '60 mins', price: 55, status: 'available' },
-  { time: '9:00 PM', duration: '60 mins', price: 50, status: 'booked' },
+  { time: '5:00 PM', duration: '60 mins', price: 900, status: 'booked' },
+  { time: '6:00 PM', duration: '60 mins', price: 1200, status: 'available' },
+  { time: '7:00 PM', duration: '60 mins', price: 1200, status: 'available' },
+  { time: '8:00 PM', duration: '60 mins', price: 1100, status: 'available' },
+  { time: '9:00 PM', duration: '60 mins', price: 1000, status: 'booked' },
 ];
 
 export default function SlotBookingPage() {
-  useParams();
+  const { turfId } = useParams();
+  const navigate = useNavigate();
+  const turf = getTurfById(turfId);
+
   const [selectedDay, setSelectedDay] = useState(16);
   const [selectedSlot, setSelectedSlot] = useState('7:00 PM');
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleConfirm = async () => {
+    setError('');
+    const slot = SLOTS.find((s) => s.time === selectedSlot);
+    if (!slot || slot.status !== 'available') {
+      setError('Please pick an available slot');
+      return;
+    }
+    try {
+      setSubmitting(true);
+      await bookingApi.create({
+        turfId: Number(turfId),
+        slotLabel: slot.time,
+        bookingDate: new Date().toISOString().slice(0, 10),
+        amount: slot.price,
+      });
+      navigate('/my-bookings');
+    } catch (err) {
+      setError(err?.response?.data?.message || 'Could not save booking. Try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <main className="pt-8 pb-28 px-6 max-w-5xl mx-auto w-full">
       <div className="mb-10 text-center">
         <h1 className="text-4xl font-bold text-on-surface mb-2">Select Your Slot</h1>
-        <p className="text-on-surface-variant text-lg">Turf XL Baisakhi - Main Pitch</p>
+        <p className="text-on-surface-variant text-lg">
+          {turf ? `${turf.name} — ${turf.location}` : 'Turf XL Baisakhi - Main Pitch'}
+        </p>
       </div>
 
       {/* Date picker */}
@@ -82,7 +114,7 @@ export default function SlotBookingPage() {
 
       {/* Time slots */}
       <h3 className="text-xl font-semibold text-on-surface mb-6">Available Times</h3>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
         {SLOTS.map((s) => {
           if (s.status === 'booked') {
             return (
@@ -99,7 +131,9 @@ export default function SlotBookingPage() {
                     Booked
                   </span>
                 </div>
-                <div className="text-on-surface-variant font-medium">${s.price.toFixed(2)}</div>
+                <div className="text-on-surface-variant font-medium">
+                  ₹{s.price.toLocaleString('en-IN')}
+                </div>
               </div>
             );
           }
@@ -123,7 +157,7 @@ export default function SlotBookingPage() {
                   </span>
                 </div>
                 <div className="relative z-10 text-on-primary font-bold text-lg">
-                  ${s.price.toFixed(2)}
+                  ₹{s.price.toLocaleString('en-IN')}
                 </div>
               </div>
             );
@@ -146,17 +180,27 @@ export default function SlotBookingPage() {
                   Available
                 </span>
               </div>
-              <div className="text-on-surface font-medium text-lg">${s.price.toFixed(2)}</div>
+              <div className="text-on-surface font-medium text-lg">
+                ₹{s.price.toLocaleString('en-IN')}
+              </div>
             </button>
           );
         })}
       </div>
 
+      {error && (
+        <p className="text-sm text-error text-center mb-4">{error}</p>
+      )}
+
       {/* Sticky CTA */}
       <div className="fixed bottom-0 left-0 w-full bg-surface/90 backdrop-blur-md border-t border-outline-variant/15 p-4 z-40 md:relative md:bg-transparent md:border-none md:p-0 md:flex md:justify-end">
-        <button className="w-full md:w-auto bg-gradient-primary text-on-primary font-bold text-lg py-4 px-12 rounded-full shadow-lg hover:scale-[1.02] transition-transform flex items-center justify-center gap-2">
-          Continue to Payment
-          <span className="material-symbols-outlined">arrow_forward</span>
+        <button
+          onClick={handleConfirm}
+          disabled={submitting}
+          className="w-full md:w-auto bg-gradient-primary text-on-primary font-bold text-lg py-4 px-12 rounded-full shadow-lg hover:scale-[1.02] transition-transform flex items-center justify-center gap-2 disabled:opacity-60 disabled:hover:scale-100"
+        >
+          {submitting ? 'Saving...' : 'Confirm Booking'}
+          {!submitting && <span className="material-symbols-outlined">check_circle</span>}
         </button>
       </div>
     </main>
