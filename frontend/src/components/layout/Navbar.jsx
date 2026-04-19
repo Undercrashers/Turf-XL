@@ -37,17 +37,12 @@ export default function Navbar() {
               </button>
             </>
           ) : (
-            <>
-              <Link to="/login" className="text-on-surface-variant font-medium hover:text-primary transition-colors">
-                Login
-              </Link>
-              <Link
-                to="/login"
-                className="bg-gradient-primary text-on-primary px-6 py-2 rounded-full font-headline font-semibold shadow-lg shadow-primary/20 hover:scale-105 transition-transform"
-              >
-                Sign Up
-              </Link>
-            </>
+            <Link
+              to="/login"
+              className="bg-gradient-primary text-on-primary px-6 py-2 rounded-full font-headline font-semibold shadow-lg shadow-primary/20 hover:scale-105 transition-transform"
+            >
+              Get Started
+            </Link>
           )}
         </div>
       </div>

@@ -1,40 +1,5 @@
 import { Link } from 'react-router-dom';
-
-const FEATURED_TURFS = [
-  {
-    id: 1,
-    name: 'Salt Lake Arena',
-    location: 'Sector V, Kolkata',
-    price: 1200,
-    rating: 4.9,
-    available: true,
-    tags: ['5v5 Football', 'Turf'],
-    image:
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuAMNUMOvFYITmVisHHSN8X6PODyo8Zgi0lO61EKDvF8ZxZLcsIy7xzIxm4_qfzLfPKNWMBri2iLAD2wPiUPTrOSK9xu4on9PbgipXqh0Wk5bon6PjIMQKgy0agyOZgD0KlGs_QXHV62ECV0AL_-eP4j7VRARGXHLfyqDZJ2W26QKBI2kNZE9rB2DFiIE5_x8sn0_PhlMHJ8s5z1jQxKsLzcBgkrYlgYbPGG9oYdML0HGRwI0bTLiOrcOtt1eVR3DBI_vmv1kRL8BB7q',
-  },
-  {
-    id: 2,
-    name: 'Elite Sports Hub',
-    location: 'New Town, Kolkata',
-    price: 1500,
-    rating: 4.8,
-    available: false,
-    tags: ['7v7 Football', 'Cricket'],
-    image:
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuCVXR-3XpIMZHKJUcaosiFf3GhsEoJRrsBr5x2SU0dqlsCZ9GohtYV9aYOEBRXWASmCn7bHby-oWJsB-1QOraiDLs5vzBVZhL3rs-g8RE-d-fZdPN0VwOto0HZeUqX83lZmljfRi43S6uofEMzSdkbGMGbdRZevULxd-F3rZOklTkqBFNc6t85x6gxVBc2MIFy-AGOp34XmWypbV8ypw-kYbsEOz9UBAKNm34NtRrlcREsYw7yh7Tqd9eiCCOs4HneLufdhd7j-xQvA',
-  },
-  {
-    id: 3,
-    name: 'Park Circus Pitch',
-    location: 'Park Circus, Kolkata',
-    price: 1000,
-    rating: 4.7,
-    available: true,
-    tags: ['Box Cricket', '5v5 Football'],
-    image:
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuDHKlcuZwVXzONiXuEI2lVkP69aw30Orz3KGxmU_KLSDcqz91LiblkyrfTAFATLWObXCenj1Tz-2ienlWCzW-MdcMgG-x1eiiBNozYEdTiuaJjt2BO9tQkEn9qPO1jPd72JR6-tCenfcXBiGhjsHanySobDbtnELR37QUSDtblYxbEVnTaX56PO6PY62EHcCrK27QfZkdVKDoUAOSsJ0D1Wari2oTSHThTIPcerqS8mkC6EtlyS17nDiBhx_RlQTCB0AMWqWZKeB0gY',
-  },
-];
+import { FEATURED_TURFS } from '../features/turf/mockTurfs.js';
 
 export default function HomePage() {
   return (
@@ -172,12 +137,8 @@ export default function HomePage() {
                       {turf.rating}
                     </span>
                   </div>
-                  <div
-                    className={`absolute top-4 right-4 px-3 py-1 rounded-full font-label text-xs font-bold tracking-wider ${
-                      turf.available ? 'bg-primary text-on-primary' : 'bg-error text-on-error'
-                    }`}
-                  >
-                    {turf.available ? 'AVAILABLE' : 'BOOKED'}
+                  <div className="absolute top-4 right-4 px-3 py-1 rounded-full font-label text-xs font-bold tracking-wider bg-primary text-on-primary">
+                    AVAILABLE
                   </div>
                 </div>
                 <div className="p-6">
@@ -210,13 +171,9 @@ export default function HomePage() {
                   </div>
                   <Link
                     to={`/turfs/${turf.id}`}
-                    className={`block text-center w-full font-headline font-semibold py-3 rounded-xl transition-colors ${
-                      turf.available
-                        ? 'bg-surface-container-high text-on-surface group-hover:bg-primary group-hover:text-on-primary'
-                        : 'bg-surface-container-high text-on-surface-variant cursor-not-allowed opacity-70'
-                    }`}
+                    className="block text-center w-full font-headline font-semibold py-3 rounded-xl transition-colors bg-surface-container-high text-on-surface group-hover:bg-primary group-hover:text-on-primary"
                   >
-                    {turf.available ? 'Book Slot' : 'Check Availability'}
+                    Book Slot
                   </Link>
                 </div>
               </div>

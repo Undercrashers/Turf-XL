@@ -1,51 +1,11 @@
 import { Link, useParams } from 'react-router-dom';
-
-const AMENITIES = [
-  { icon: 'directions_car', label: 'Free Parking' },
-  { icon: 'wb_incandescent', label: 'LED Floodlights' },
-  { icon: 'wc', label: 'Washrooms' },
-  { icon: 'local_drink', label: 'Water Station' },
-];
+import { getTurfById } from '../features/turf/mockTurfs.js';
 
 const DATES = [
   { label: 'Today', day: '14', active: true },
   { label: 'Tue', day: '15' },
   { label: 'Wed', day: '16' },
   { label: 'Thu', day: '17' },
-];
-
-const SLOTS = [
-  { time: '18:00 - 19:00', available: false },
-  { time: '19:00 - 20:00', available: true },
-  { time: '20:00 - 21:00', available: true },
-  { time: '21:00 - 22:00', available: true },
-];
-
-const REVIEWS = [
-  {
-    initials: 'JD',
-    name: 'Jason D.',
-    when: '2 days ago',
-    stars: 5,
-    body:
-      '"Best turf in the city. The lights are perfect for evening games, and the surface is really forgiving on the knees. Highly recommend."',
-  },
-  {
-    initials: 'MR',
-    name: 'Marcus R.',
-    when: '1 week ago',
-    stars: 4.5,
-    body:
-      '"Great facility. Parking can get a bit tight during peak league hours, but the actual pitch quality is top tier."',
-  },
-  {
-    initials: 'SK',
-    name: 'Sarah K.',
-    when: '2 weeks ago',
-    stars: 5,
-    body:
-      '"Booked for a casual 7v7. The netting keeps the ball in play beautifully. Will definitely be making this our regular spot."',
-  },
 ];
 
 function Stars({ value }) {
@@ -78,6 +38,26 @@ function Stars({ value }) {
 
 export default function TurfDetailsPage() {
   const { turfId } = useParams();
+  const turf = getTurfById(turfId);
+
+  if (!turf) {
+    return (
+      <main className="pt-24 pb-32">
+        <div className="max-w-3xl mx-auto px-6 text-center">
+          <h1 className="font-headline text-3xl font-bold text-on-surface mb-4">Venue not found</h1>
+          <p className="text-on-surface-variant mb-8">
+            We couldn&apos;t find a venue with that id. Pick one from the featured list.
+          </p>
+          <Link
+            to="/"
+            className="inline-block bg-gradient-primary text-on-primary px-6 py-3 rounded-full font-headline font-semibold"
+          >
+            Back to Home
+          </Link>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="pt-8 pb-32">
@@ -87,37 +67,37 @@ export default function TurfDetailsPage() {
           <img
             alt=""
             className="absolute inset-0 w-full h-full object-cover"
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuD5QK40x7LgxUF7sd7_m5VmqDRV7WvP-b4iy4g8GtwafNELhSFYZVWL-2DlppkUTWtFRGcZlmr1w43GXIpRKk0INCU5iQuFw-8V2W5Fe2MfDjQ7glKOTYT2tEbNbhhxfvTnb0Ai4I43Qd-GpdD5-JWGPfsq876kWaUAY2UlzHl8VOaEj3o2LIDxSGe_kW1oiK-s8UR2bsFL7AMLAAD-zJveUsf7_4TNRs7j4NW7KUXlR8E4p9wVYasIZfEEkuDTaL5s5CTl_aDcGG9l"
+            src={turf.image}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />
 
           <div className="absolute bottom-8 left-8 right-8 md:right-auto md:w-[480px] p-8 rounded-3xl glass-panel text-on-surface">
             <div className="flex items-center gap-2 mb-3">
               <span className="px-3 py-1 bg-tertiary-fixed text-on-tertiary-fixed-variant rounded-full text-xs font-bold uppercase tracking-wider font-label">
-                Premium
+                {turf.tagline}
               </span>
               <span className="flex items-center text-sm font-medium text-secondary">
                 <span className="material-symbols-outlined text-[18px] mr-1 text-tertiary-container fill">
                   star
                 </span>
-                4.9 (128 Reviews)
+                {turf.rating} ({turf.reviewCount} Reviews)
               </span>
             </div>
             <h1 className="text-4xl md:text-5xl font-bold font-headline text-on-surface mb-2 tracking-tight">
-              Turf XL Baisakhi
+              {turf.name}
             </h1>
             <p className="text-lg text-on-surface-variant mb-6 flex items-center">
               <span className="material-symbols-outlined mr-2">location_on</span>
-              Baisakhi, Salt Lake, Kolkata
+              {turf.address}
             </p>
             <div className="flex flex-wrap gap-3">
               <div className="flex items-center gap-2 bg-surface-container px-4 py-2 rounded-full text-sm font-medium">
                 <span className="material-symbols-outlined text-[20px] text-primary">groups</span>
-                7v7 Format
+                {turf.format}
               </div>
               <div className="flex items-center gap-2 bg-surface-container px-4 py-2 rounded-full text-sm font-medium">
                 <span className="material-symbols-outlined text-[20px] text-primary">straighten</span>
-                40m x 25m
+                {turf.size}
               </div>
             </div>
           </div>
@@ -130,22 +110,22 @@ export default function TurfDetailsPage() {
               <h2 className="text-2xl font-semibold font-headline mb-4 text-on-surface">
                 About the Facility
               </h2>
-              <p className="text-base leading-relaxed text-secondary mb-6">
-                Experience the pinnacle of urban football at Turf XL Baisakhi. Featuring FIFA-certified 4G
-                artificial grass, this arena is designed for fast-paced, high-intensity play. The
-                surface offers exceptional grip and shock absorption, ensuring peak performance and
-                reduced injury risk regardless of weather conditions.
-              </p>
-              <p className="text-base leading-relaxed text-secondary">
-                Enclosed by heavy-duty netting and illuminated by state-of-the-art LED floodlights, you
-                can play well into the night without losing sight of the ball.
-              </p>
+              {turf.about.map((para, i) => (
+                <p
+                  key={i}
+                  className={`text-base leading-relaxed text-secondary ${
+                    i < turf.about.length - 1 ? 'mb-6' : ''
+                  }`}
+                >
+                  {para}
+                </p>
+              ))}
             </section>
 
             <section>
               <h2 className="text-2xl font-semibold font-headline mb-6 text-on-surface">Amenities</h2>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                {AMENITIES.map((a) => (
+                {turf.amenities.map((a) => (
                   <div
                     key={a.label}
                     className="bg-surface-container-low p-6 rounded-2xl flex flex-col items-center justify-center text-center gap-3 hover:bg-surface-container transition-colors"
@@ -179,7 +159,7 @@ export default function TurfDetailsPage() {
             <div className="sticky top-24 bg-surface-container-lowest p-8 rounded-3xl shadow-ambient border border-outline-variant/15">
               <div className="flex justify-between items-baseline mb-6">
                 <h3 className="text-3xl font-bold font-headline text-on-surface tracking-tight">
-                  ₹1,200
+                  ₹{turf.price.toLocaleString('en-IN')}
                   <span className="text-lg text-secondary font-medium font-body">/hour</span>
                 </h3>
                 <span className="text-sm font-bold text-primary bg-primary-container/10 px-3 py-1 rounded-full font-label uppercase tracking-widest">
@@ -215,7 +195,7 @@ export default function TurfDetailsPage() {
                   Available Times
                 </label>
                 <div className="grid grid-cols-2 gap-3">
-                  {SLOTS.map((s) => (
+                  {turf.slots.map((s) => (
                     <button
                       key={s.time}
                       disabled={!s.available}
@@ -232,7 +212,7 @@ export default function TurfDetailsPage() {
               </div>
 
               <Link
-                to={`/turfs/${turfId}/book`}
+                to={`/turfs/${turf.id}/book`}
                 className="block text-center w-full py-4 rounded-xl bg-gradient-primary text-on-primary font-bold text-lg tracking-wide shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all duration-300"
               >
                 Book Now
@@ -253,7 +233,7 @@ export default function TurfDetailsPage() {
             </button>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {REVIEWS.map((r) => (
+            {turf.reviews.map((r) => (
               <div
                 key={r.initials}
                 className="bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant/15"
