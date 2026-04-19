@@ -114,13 +114,13 @@ export default function VerifyOtpPage() {
       </div>
 
       <form className="flex flex-col gap-8" onSubmit={handleSubmit}>
-        <div className="flex justify-between gap-2 sm:gap-3" onPaste={handlePaste}>
+        <div className="flex justify-between gap-1.5 sm:gap-2 w-full" onPaste={handlePaste}>
           {digits.map((digit, i) => (
             <input
               key={i}
               ref={(el) => (inputs.current[i] = el)}
               aria-label={`Digit ${i + 1}`}
-              className="w-12 h-14 sm:w-14 sm:h-16 text-center font-headline text-2xl font-bold bg-surface-container-low text-on-surface rounded-lg border-0 focus:ring-0 focus:outline-none focus:shadow-[inset_0_0_0_2px_rgba(0,107,44,0.4)] transition-all duration-200"
+              className="flex-1 min-w-0 aspect-[3/4] max-h-14 text-center font-headline text-xl sm:text-2xl font-bold bg-surface-container-low text-on-surface rounded-lg border-0 p-0 focus:ring-0 focus:outline-none focus:shadow-[inset_0_0_0_2px_rgba(0,107,44,0.4)] transition-all duration-200"
               type="text"
               inputMode="numeric"
               maxLength={1}

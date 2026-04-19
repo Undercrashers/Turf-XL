@@ -13,7 +13,12 @@
       "Bash(curl -s -o /dev/null -w \"frontend %{http_code}\\\\n\" http://localhost:5173/)",
       "Bash(curl -s -o /dev/null -w \"backend  %{http_code}\\\\n\" http://localhost:8080/api/v1/turfs)",
       "Bash(curl -s -X POST -H \"Content-Type: application/json\" -d '{\"email\":\"test@example.com\"}' http://localhost:8080/api/v1/auth/request-otp)",
-      "Bash(curl *)"
+      "Bash(curl *)",
+      "Bash(./mvnw spring-boot:run)",
+      "Bash(mvn spring-boot:run)",
+      "Bash(MAIL_USERNAME=\"priyanshude219@gmail.com\" MAIL_PASSWORD=\"gfmowrqaqebosnjz\" mvn spring-boot:run)",
+      "Bash(netstat -ano)",
+      "Bash(taskkill *)"
     ]
   }
 }

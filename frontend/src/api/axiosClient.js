@@ -14,7 +14,13 @@ axiosClient.interceptors.request.use((config) => {
 });
 
 axiosClient.interceptors.response.use(
-  (response) => response.data,
+  (response) => {
+    const body = response.data;
+    if (body && typeof body === 'object' && 'success' in body && 'data' in body) {
+      return body.data;
+    }
+    return body;
+  },
   (error) => {
     if (error?.response?.status === 401) {
       localStorage.removeItem(STORAGE_KEYS.TOKEN);

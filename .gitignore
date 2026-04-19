@@ -26,3 +26,6 @@ build/
 # Java / Maven (handled per-module too)
 target/
 *.class
+
+
+.claude
