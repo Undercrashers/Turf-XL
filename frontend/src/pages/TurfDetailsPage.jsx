@@ -5,6 +5,7 @@ import { bookingApi } from '../api/bookingApi.js';
 import { slotApi } from '../api/slotApi.js';
 import { useAuth } from '../hooks/useAuth.js';
 import { toLocalIsoDate, todayLocalIso } from '../utils/dates.js';
+import ProfileCompletionModal from '../components/common/ProfileCompletionModal.jsx';
 
 const DAY_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const STANDARD_SLOTS = ['17:00', '18:00', '19:00', '20:00', '21:00', '22:00'];
@@ -42,8 +43,10 @@ function to12HourLabel(start24) {
 export default function TurfDetailsPage() {
   const { turfId } = useParams();
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const turf = getTurfById(turfId);
+
+  const hasCompleteProfile = Boolean(user?.name && user?.phone);
 
   const dateOptions = useMemo(() => buildDateOptions(4), []);
 
@@ -54,6 +57,7 @@ export default function TurfDetailsPage() {
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [profileModalOpen, setProfileModalOpen] = useState(false);
 
   const sportPricing = turf?.sportPricing ?? { football: turf?.price ?? 0 };
   const currentPrice = sportPricing[sport] ?? turf?.price ?? 0;
@@ -125,7 +129,26 @@ export default function TurfDetailsPage() {
     );
   }
 
-  const handleBook = async () => {
+  const submitBooking = async () => {
+    try {
+      setSubmitting(true);
+      await bookingApi.create({
+        turfId: Number(turf.id),
+        slotLabel: to12HourLabel(selectedSlot),
+        bookingDate: selectedDate,
+        amount: currentPrice,
+        sport,
+      });
+      navigate('/my-bookings');
+    } catch (err) {
+      setError(err?.response?.data?.message || 'Could not save booking. Try again.');
+      await refreshSlots();
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleBook = () => {
     setError('');
     if (!isAuthenticated) {
       navigate('/login');
@@ -143,22 +166,11 @@ export default function TurfDetailsPage() {
       setError('That slot time has already passed today. Pick a later time or another date.');
       return;
     }
-    try {
-      setSubmitting(true);
-      await bookingApi.create({
-        turfId: Number(turf.id),
-        slotLabel: to12HourLabel(selectedSlot),
-        bookingDate: selectedDate,
-        amount: currentPrice,
-        sport,
-      });
-      navigate('/my-bookings');
-    } catch (err) {
-      setError(err?.response?.data?.message || 'Could not save booking. Try again.');
-      await refreshSlots();
-    } finally {
-      setSubmitting(false);
+    if (!hasCompleteProfile) {
+      setProfileModalOpen(true);
+      return;
     }
+    submitBooking();
   };
 
   return (
@@ -350,6 +362,15 @@ export default function TurfDetailsPage() {
           </div>
         </div>
       </div>
+
+      <ProfileCompletionModal
+        open={profileModalOpen}
+        onClose={() => setProfileModalOpen(false)}
+        onComplete={() => {
+          setProfileModalOpen(false);
+          submitBooking();
+        }}
+      />
     </main>
   );
 }

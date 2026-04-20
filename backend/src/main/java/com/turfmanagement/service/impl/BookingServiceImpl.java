@@ -45,6 +45,11 @@ public class BookingServiceImpl implements BookingService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BadRequestException("User not found"));
 
+        if (user.getName() == null || user.getName().isBlank()
+                || user.getPhone() == null || user.getPhone().isBlank()) {
+            throw new BadRequestException("Please add your name and phone number before booking.");
+        }
+
         Turf turf = turfRepository.findById(dto.getTurfId())
                 .orElseThrow(() -> new BadRequestException("Turf not found"));
 
