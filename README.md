@@ -1,107 +1,47 @@
-# Turf XL Baisakhi – Turf Management System
+# Turf XL
 
-A full-stack MVP for booking and managing turfs at **Turf XL Baisakhi**.
-This repository contains the base project skeleton only (no advanced business
-logic yet) and is structured to be portfolio / interview / demo ready.
+Turf booking app. React + Spring Boot + H2 (in-memory).
 
----
+## Run
 
-## Tech Stack
-
-**Frontend**
-- React + Vite
-- Tailwind CSS
-- React Router
-- Axios
-- Context API (auth + global state)
-
-**Backend**
-- Spring Boot (Java 17)
-- Maven
-- MySQL
-- Spring Data JPA / Hibernate
-- Spring Security + JWT
-- Hibernate Validator
-- Email OTP based authentication
-
----
-
-## Repository Structure
-
+**Backend** (Java 17, Maven):
+```bash
+cd backend
+MAIL_USERNAME=<gmail> MAIL_PASSWORD=<gmail-app-password> mvn spring-boot:run
 ```
-Turf XL/
-├── frontend/      # React + Vite client
-├── backend/       # Spring Boot REST API
-├── .gitignore
-└── README.md
-```
+Listens on `http://localhost:8080/api/v1`. If the mail env vars are omitted, OTPs are logged to the console instead of emailed.
 
-See `frontend/README.md` and `backend/README.md` for module level details.
-
----
-
-## Authentication Flow (Email OTP Only)
-
-1. User enters email on `LoginPage`
-2. Backend sends OTP to email
-3. User submits OTP on `VerifyOtpPage`
-4. Backend verifies OTP and returns JWT
-5. If user is **existing** → redirect to `UserDashboardPage`
-6. If user is **new** → redirect to `CompleteProfilePage` (name + phone)
-7. Profile saved → redirect to dashboard
-
-There is no separate signup page and no password login.
-
----
-
-## Running Locally
-
-### Frontend
+**Frontend** (Node 18+):
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
+Listens on `http://localhost:5173`.
 
-### Backend
-```bash
-cd backend
-./mvnw spring-boot:run
-```
+## User flow
 
----
+1. Open `http://localhost:5173`
+2. Click **Get Started** → enter email → enter the 6-digit OTP from your inbox (or backend console in dev)
+3. First-time users: fill name + phone, then you're on the dashboard
+4. Browse venues → **Book Now** on any turf → pick sport, date, time → booking is saved
+5. **My Bookings** shows all confirmed/cancelled bookings. Cancel button frees the slot.
 
-## Branch Naming Convention
+## Admin flow
 
-| Prefix      | Purpose                          | Example                       |
-|-------------|----------------------------------|-------------------------------|
-| `main`      | Stable release                   | `main`                        |
-| `develop`   | Integration branch               | `develop`                     |
-| `feature/`  | New features                     | `feature/otp-login`           |
-| `bugfix/`   | Non-critical bug fixes           | `bugfix/slot-time-overlap`    |
-| `hotfix/`   | Production hotfixes              | `hotfix/jwt-expiry`           |
-| `chore/`    | Tooling / config / docs          | `chore/update-readme`         |
+Go to `http://localhost:5173/admin/login`. Seeded credentials:
 
----
+| Role            | Email                     | Password   | Scope                     |
+|-----------------|---------------------------|------------|---------------------------|
+| Super Admin     | `super.admin@turfxl.com`  | `super123` | All bookings, every turf  |
+| Salt Lake Admin | `salt.admin@turfxl.com`   | `admin123` | Salt Lake Arena only      |
+| Elite Admin     | `elite.admin@turfxl.com`  | `admin123` | Elite Sports Hub only     |
+| Park Circus Admin | `park.admin@turfxl.com` | `admin123` | Park Circus Pitch only    |
 
-## Development Phases
+The admin dashboard shows bookings with customer name/email/phone, time, sport, amount, and status. Field admins see only their venue; super admin sees everything.
 
-### Phase 1 (MVP base — this repo)
-- Project skeleton + routing + layouts
-- Email OTP login flow (wiring only)
-- Placeholder pages and controllers
-- DB entity planning
-- JWT + Spring Security config
+## Notes
 
-### Phase 2 (Feature build-out)
-- Real OTP service + email integration
-- Turf / Slot / Booking CRUD
-- Payment integration (Razorpay / Stripe stub)
-- Admin dashboard with real data
-- Reviews, amenities, analytics
-
----
-
-## License
-
-For educational and portfolio use.
+- H2 is in-memory — restart wipes all data (users, bookings). Seed turfs + admin accounts are recreated on startup.
+- All prices in ₹ (INR). Dates use local timezone.
+- Backend API base path: `/api/v1`. CORS allows `http://localhost:5173`.
