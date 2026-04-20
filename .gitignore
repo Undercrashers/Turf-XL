@@ -22,10 +22,10 @@ logs/
 node_modules/
 dist/
 build/
+.claude/
 
 # Java / Maven (handled per-module too)
 target/
 *.class
 
 
-.claude

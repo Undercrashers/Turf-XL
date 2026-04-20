@@ -43,5 +43,4 @@ The admin dashboard shows bookings with customer name/email/phone, time, sport, 
 ## Notes
 
 - H2 is in-memory — restart wipes all data (users, bookings). Seed turfs + admin accounts are recreated on startup.
-- All prices in ₹ (INR). Dates use local timezone.
 - Backend API base path: `/api/v1`. CORS allows `http://localhost:5173`.
