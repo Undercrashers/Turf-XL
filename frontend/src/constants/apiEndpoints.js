@@ -25,5 +25,6 @@ export const API_ENDPOINTS = {
   ADMIN: {
     DASHBOARD: '/admin/dashboard',
     BOOKINGS: '/admin/bookings',
+    CANCEL_BOOKING: (id) => `/admin/bookings/${id}/cancel`,
   },
 };

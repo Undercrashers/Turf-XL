@@ -2,16 +2,20 @@ package com.turfmanagement.controller;
 
 import com.turfmanagement.dto.response.AdminBookingDto;
 import com.turfmanagement.dto.response.ApiResponse;
+import com.turfmanagement.dto.response.BookingResponseDto;
 import com.turfmanagement.entity.Booking;
 import com.turfmanagement.entity.User;
 import com.turfmanagement.enums.Role;
 import com.turfmanagement.exception.BadRequestException;
 import com.turfmanagement.repository.BookingRepository;
+import com.turfmanagement.service.BookingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -24,6 +28,7 @@ import java.util.List;
 public class AdminController {
 
     private final BookingRepository bookingRepository;
+    private final BookingService bookingService;
 
     @GetMapping("/bookings")
     @Transactional(readOnly = true)
@@ -59,5 +64,11 @@ public class AdminController {
         ).toList();
 
         return ApiResponse.ok(dtos);
+    }
+
+    @PostMapping("/bookings/{id}/cancel")
+    public ApiResponse<BookingResponseDto> cancelBooking(@AuthenticationPrincipal User admin,
+                                                         @PathVariable Long id) {
+        return ApiResponse.ok(bookingService.adminCancel(admin, id));
     }
 }

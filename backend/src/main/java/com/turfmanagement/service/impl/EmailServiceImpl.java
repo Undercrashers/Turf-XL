@@ -33,4 +33,23 @@ public class EmailServiceImpl implements EmailService {
         // TODO: implement later
         log.info("Booking confirmation would be sent to {}: {}", to, bookingDetails);
     }
+
+    @Override
+    public void sendBookingCancellation(String to, String bookingDetails) {
+        try {
+            SimpleMailMessage msg = new SimpleMailMessage();
+            msg.setTo(to);
+            msg.setSubject("Your Turf XL booking was cancelled");
+            msg.setText(
+                    "Hi,\n\n"
+                            + "Your Turf XL booking has been cancelled by the venue admin.\n\n"
+                            + "Booking details:\n" + bookingDetails + "\n\n"
+                            + "The slot is now available again — you're welcome to rebook this or another time from your dashboard.\n\n"
+                            + "— Turf XL Team"
+            );
+            mailSender.send(msg);
+        } catch (Exception e) {
+            log.warn("[DEV] Cancellation email send failed for {}: {}", to, bookingDetails);
+        }
+    }
 }

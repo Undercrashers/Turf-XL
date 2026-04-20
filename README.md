@@ -5,18 +5,22 @@ Turf booking app. React + Spring Boot + H2 (in-memory).
 ## Run
 
 **Backend** (Java 17, Maven):
+
 ```bash
 cd backend
 MAIL_USERNAME=<gmail> MAIL_PASSWORD=<gmail-app-password> mvn spring-boot:run
 ```
+
 Listens on `http://localhost:8080/api/v1`. If the mail env vars are omitted, OTPs are logged to the console instead of emailed.
 
 **Frontend** (Node 18+):
+
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
+
 Listens on `http://localhost:5173`.
 
 ## User flow
@@ -31,12 +35,12 @@ Listens on `http://localhost:5173`.
 
 Go to `http://localhost:5173/admin/login`. Seeded credentials:
 
-| Role            | Email                     | Password   | Scope                     |
-|-----------------|---------------------------|------------|---------------------------|
-| Super Admin     | `super.admin@turfxl.com`  | `super123` | All bookings, every turf  |
-| Salt Lake Admin | `salt.admin@turfxl.com`   | `admin123` | Salt Lake Arena only      |
-| Elite Admin     | `elite.admin@turfxl.com`  | `admin123` | Elite Sports Hub only     |
-| Park Circus Admin | `park.admin@turfxl.com` | `admin123` | Park Circus Pitch only    |
+| Role              | Email                    | Password   | Scope                    |
+| ----------------- | ------------------------ | ---------- | ------------------------ |
+| Super Admin       | `super.admin@turfxl.com` | `super123` | All bookings, every turf |
+| Salt Lake Admin   | `salt.admin@turfxl.com`  | `admin123` | Salt Lake Arena only     |
+| Elite Admin       | `elite.admin@turfxl.com` | `admin123` | Elite Sports Hub only    |
+| Park Circus Admin | `park.admin@turfxl.com`  | `admin123` | Park Circus Pitch only   |
 
 The admin dashboard shows bookings with customer name/email/phone, time, sport, amount, and status. Field admins see only their venue; super admin sees everything.
 

@@ -7,6 +7,7 @@ import com.turfmanagement.entity.Slot;
 import com.turfmanagement.entity.Turf;
 import com.turfmanagement.entity.User;
 import com.turfmanagement.enums.BookingStatus;
+import com.turfmanagement.enums.Role;
 import com.turfmanagement.exception.BadRequestException;
 import com.turfmanagement.mapper.BookingMapper;
 import com.turfmanagement.repository.BookingRepository;
@@ -14,6 +15,7 @@ import com.turfmanagement.repository.SlotRepository;
 import com.turfmanagement.repository.TurfRepository;
 import com.turfmanagement.repository.UserRepository;
 import com.turfmanagement.service.BookingService;
+import com.turfmanagement.service.EmailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -38,6 +40,7 @@ public class BookingServiceImpl implements BookingService {
     private final TurfRepository turfRepository;
     private final UserRepository userRepository;
     private final BookingMapper bookingMapper;
+    private final EmailService emailService;
 
     @Override
     @Transactional
@@ -114,5 +117,58 @@ public class BookingServiceImpl implements BookingService {
             slotRepository.save(slot);
         }
         return bookingMapper.toDto(booking);
+    }
+
+    @Override
+    @Transactional
+    public BookingResponseDto adminCancel(User admin, Long bookingId) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new BadRequestException("Booking not found"));
+
+        if (admin.getRole() == Role.ADMIN) {
+            if (admin.getManagedTurfId() == null
+                    || booking.getTurf() == null
+                    || !booking.getTurf().getId().equals(admin.getManagedTurfId())) {
+                throw new BadRequestException("You can only cancel bookings for your venue.");
+            }
+        } else if (admin.getRole() != Role.SUPER_ADMIN) {
+            throw new BadRequestException("Not authorized");
+        }
+
+        if (booking.getStatus() == BookingStatus.CANCELLED) {
+            return bookingMapper.toDto(booking);
+        }
+
+        booking.setStatus(BookingStatus.CANCELLED);
+        bookingRepository.save(booking);
+
+        Slot slot = booking.getSlot();
+        if (slot != null) {
+            slot.setAvailable(true);
+            slotRepository.save(slot);
+        }
+
+        User customer = booking.getUser();
+        if (customer != null && customer.getEmail() != null) {
+            String details = buildBookingDetails(booking);
+            emailService.sendBookingCancellation(customer.getEmail(), details);
+        }
+
+        log.info("[BOOKING] Admin {} cancelled booking id={}", admin.getEmail(), booking.getId());
+        return bookingMapper.toDto(booking);
+    }
+
+    private String buildBookingDetails(Booking booking) {
+        String turfName = booking.getTurf() != null ? booking.getTurf().getName() : "—";
+        String address = booking.getTurf() != null && booking.getTurf().getAddress() != null
+                ? booking.getTurf().getAddress() : "—";
+        String when = booking.getSlot() != null && booking.getSlot().getStartTime() != null
+                ? booking.getSlot().getStartTime().toString() : "—";
+        String amount = booking.getTotalAmount() != null
+                ? "Rs. " + booking.getTotalAmount().toPlainString() : "—";
+        return "Venue: " + turfName + "\n"
+                + "Address: " + address + "\n"
+                + "Slot: " + when + "\n"
+                + "Amount: " + amount;
     }
 }

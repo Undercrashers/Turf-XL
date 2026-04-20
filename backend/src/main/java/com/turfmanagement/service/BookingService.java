@@ -9,4 +9,5 @@ public interface BookingService {
     BookingResponseDto create(Long userId, BookingCreateDto dto);
     List<BookingResponseDto> myBookings(Long userId);
     BookingResponseDto cancel(Long userId, Long bookingId);
+    BookingResponseDto adminCancel(com.turfmanagement.entity.User admin, Long bookingId);
 }

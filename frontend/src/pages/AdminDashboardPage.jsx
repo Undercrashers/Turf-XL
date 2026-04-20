@@ -23,6 +23,7 @@ export default function AdminDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
+  const [cancellingId, setCancellingId] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -58,6 +59,26 @@ export default function AdminDashboardPage() {
   const handleLogout = () => {
     logout();
     navigate('/admin/login');
+  };
+
+  const handleCancel = async (booking) => {
+    if (booking.status === 'CANCELLED') return;
+    const confirmed = window.confirm(
+      `Cancel booking for ${booking.userName || booking.userEmail}?\n` +
+        `The customer will be emailed and the slot will be freed.`
+    );
+    if (!confirmed) return;
+    try {
+      setCancellingId(booking.id);
+      await adminApi.cancelBooking(booking.id);
+      setBookings((prev) =>
+        prev.map((b) => (b.id === booking.id ? { ...b, status: 'CANCELLED' } : b))
+      );
+    } catch (err) {
+      alert(err?.response?.data?.message || 'Could not cancel booking');
+    } finally {
+      setCancellingId(null);
+    }
   };
 
   const isSuper = user?.role === ROLES.SUPER_ADMIN;
@@ -162,6 +183,9 @@ export default function AdminDashboardPage() {
                     <th className="font-label font-bold uppercase tracking-widest text-xs py-3 pr-4">
                       Status
                     </th>
+                    <th className="font-label font-bold uppercase tracking-widest text-xs py-3 pr-4 text-right">
+                      Action
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -217,6 +241,19 @@ export default function AdminDashboardPage() {
                         >
                           {b.status}
                         </span>
+                      </td>
+                      <td className="py-4 pr-4 text-right">
+                        {b.status === 'CONFIRMED' ? (
+                          <button
+                            onClick={() => handleCancel(b)}
+                            disabled={cancellingId === b.id}
+                            className="font-label font-bold text-xs px-3 py-1.5 rounded-full uppercase tracking-wider text-error border border-error/40 hover:bg-error/10 transition-colors disabled:opacity-50 disabled:cursor-wait"
+                          >
+                            {cancellingId === b.id ? 'Cancelling…' : 'Cancel'}
+                          </button>
+                        ) : (
+                          <span className="text-xs text-on-surface-variant">—</span>
+                        )}
                       </td>
                     </tr>
                   ))}

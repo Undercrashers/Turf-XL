@@ -3,4 +3,5 @@ import { API_ENDPOINTS } from '../constants/apiEndpoints.js';
 
 export const adminApi = {
   bookings: () => axiosClient.get(API_ENDPOINTS.ADMIN.BOOKINGS),
+  cancelBooking: (id) => axiosClient.post(API_ENDPOINTS.ADMIN.CANCEL_BOOKING(id)),
 };
