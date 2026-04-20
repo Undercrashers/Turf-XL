@@ -74,7 +74,7 @@ export default function UserDashboardPage() {
       {/* Bento grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Upcoming match */}
-        <div className="md:col-span-2 bg-surface-container-lowest rounded-[1.5rem] p-8 relative overflow-hidden group min-h-[280px] shadow-ambient border border-outline-variant/15">
+        <div className="md:col-span-3 bg-surface-container-lowest rounded-[1.5rem] p-8 relative overflow-hidden group min-h-[280px] shadow-ambient border border-outline-variant/15">
           {nextMatch?.turfImageUrl && (
             <>
               <div className="absolute inset-0 z-0 opacity-20">
@@ -124,25 +124,6 @@ export default function UserDashboardPage() {
                 )}
               </div>
             </div>
-          </div>
-        </div>
-
-        {/* Weather card */}
-        <div className="bg-surface-container-low rounded-[1.5rem] p-6 flex flex-col justify-between shadow-ambient border border-outline-variant/15">
-          <div>
-            <h3 className="font-headline font-semibold text-lg mb-4 text-on-surface">
-              Playing Conditions
-            </h3>
-            <div className="flex items-center justify-center py-6">
-              <span className="material-symbols-outlined text-6xl text-tertiary-fixed-dim fill">
-                clear_day
-              </span>
-            </div>
-          </div>
-          <div className="text-center">
-            <p className="font-headline text-3xl font-bold text-on-surface tracking-tight">22°C</p>
-            <p className="font-body text-secondary">Clear Evening</p>
-            <p className="font-body text-sm text-secondary mt-2">Perfect weather for a match.</p>
           </div>
         </div>
 

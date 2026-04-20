@@ -7,9 +7,6 @@ export const MOCK_TURFS = {
     address: 'Sector V, Salt Lake, Kolkata',
     price: 1200,
     sportPricing: { football: 1200, cricket: 1400 },
-    rating: 4.9,
-    reviewCount: 128,
-    tags: ['5v5 Football', 'Turf'],
     format: '5v5 Format',
     size: '30m x 20m',
     image:
@@ -24,35 +21,6 @@ export const MOCK_TURFS = {
       { icon: 'wc', label: 'Washrooms' },
       { icon: 'local_drink', label: 'Water Station' },
     ],
-    slots: [
-      { time: '18:00 - 19:00', available: false },
-      { time: '19:00 - 20:00', available: true },
-      { time: '20:00 - 21:00', available: true },
-      { time: '21:00 - 22:00', available: true },
-    ],
-    reviews: [
-      {
-        initials: 'JD',
-        name: 'Jason D.',
-        when: '2 days ago',
-        stars: 5,
-        body: '"Best turf in Sector V — the lights are perfect for evening games and the surface is really forgiving on the knees."',
-      },
-      {
-        initials: 'MR',
-        name: 'Marcus R.',
-        when: '1 week ago',
-        stars: 4.5,
-        body: '"Parking is tight during league hours, but the pitch quality is top tier."',
-      },
-      {
-        initials: 'SK',
-        name: 'Sarah K.',
-        when: '2 weeks ago',
-        stars: 5,
-        body: '"Booked for a casual 7v7. Netting keeps the ball in play beautifully — this is our regular spot now."',
-      },
-    ],
   },
   2: {
     id: 2,
@@ -62,9 +30,6 @@ export const MOCK_TURFS = {
     address: 'Action Area II, New Town, Kolkata',
     price: 1500,
     sportPricing: { football: 1500, cricket: 1800 },
-    rating: 4.8,
-    reviewCount: 214,
-    tags: ['7v7 Football', 'Cricket'],
     format: '7v7 Format',
     size: '50m x 30m',
     image:
@@ -79,35 +44,6 @@ export const MOCK_TURFS = {
       { icon: 'local_cafe', label: 'Cafeteria' },
       { icon: 'videocam', label: 'Match Recording' },
     ],
-    slots: [
-      { time: '17:00 - 18:00', available: true },
-      { time: '18:00 - 19:00', available: true },
-      { time: '19:00 - 20:00', available: false },
-      { time: '20:00 - 21:00', available: true },
-    ],
-    reviews: [
-      {
-        initials: 'AP',
-        name: 'Abhinav P.',
-        when: '3 days ago',
-        stars: 5,
-        body: '"Ran a six-team corporate tournament here. Scoreboard, recording and logistics were flawless."',
-      },
-      {
-        initials: 'RN',
-        name: 'Rahul N.',
-        when: '5 days ago',
-        stars: 4.5,
-        body: '"Great for 7v7 — the wings have enough width for proper overlaps. Cafe food is surprisingly good."',
-      },
-      {
-        initials: 'TG',
-        name: 'Tania G.',
-        when: '3 weeks ago',
-        stars: 5,
-        body: '"Box cricket setup is serious — real stumps, real crease. Best night cricket I\'ve played in Kolkata."',
-      },
-    ],
   },
   3: {
     id: 3,
@@ -117,9 +53,6 @@ export const MOCK_TURFS = {
     address: '7 Point Crossing, Park Circus, Kolkata',
     price: 1000,
     sportPricing: { football: 1000, cricket: 1100 },
-    rating: 4.7,
-    reviewCount: 96,
-    tags: ['Box Cricket', '5v5 Football'],
     format: 'Box Format',
     size: '28m x 18m',
     image:
@@ -134,38 +67,7 @@ export const MOCK_TURFS = {
       { icon: 'shower', label: 'Showers' },
       { icon: 'local_drink', label: 'Water Station' },
     ],
-    slots: [
-      { time: '18:00 - 19:00', available: true },
-      { time: '19:00 - 20:00', available: true },
-      { time: '20:00 - 21:00', available: true },
-      { time: '21:00 - 22:00', available: false },
-    ],
-    reviews: [
-      {
-        initials: 'IB',
-        name: 'Ishan B.',
-        when: '1 day ago',
-        stars: 5,
-        body: '"Best value box in central Kolkata. Rebound walls are tight — game flow never stops."',
-      },
-      {
-        initials: 'DV',
-        name: 'Divya V.',
-        when: '4 days ago',
-        stars: 4,
-        body: '"Good pitch, but it gets hot early in the day. Book after 7pm for the best experience."',
-      },
-      {
-        initials: 'KM',
-        name: 'Karan M.',
-        when: '2 weeks ago',
-        stars: 5,
-        body: '"Perfect for box cricket with friends. Owner is super flexible with time extensions too."',
-      },
-    ],
   },
 };
-
-export const FEATURED_TURFS = Object.values(MOCK_TURFS);
 
 export const getTurfById = (id) => MOCK_TURFS[Number(id)];

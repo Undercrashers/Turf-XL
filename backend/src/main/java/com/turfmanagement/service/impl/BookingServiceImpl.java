@@ -90,9 +90,16 @@ public class BookingServiceImpl implements BookingService {
         if (!booking.getUser().getId().equals(userId)) {
             throw new BadRequestException("Not your booking");
         }
+        if (booking.getStatus() == BookingStatus.CANCELLED) {
+            return bookingMapper.toDto(booking);
+        }
         booking.setStatus(BookingStatus.CANCELLED);
-        if (booking.getSlot() != null) {
-            booking.getSlot().setAvailable(true);
+        bookingRepository.save(booking);
+
+        Slot slot = booking.getSlot();
+        if (slot != null) {
+            slot.setAvailable(true);
+            slotRepository.save(slot);
         }
         return bookingMapper.toDto(booking);
     }

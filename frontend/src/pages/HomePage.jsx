@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FEATURED_TURFS } from '../features/turf/mockTurfs.js';
 import { turfApi } from '../api/turfApi.js';
 import { useAuth } from '../hooks/useAuth.js';
 
@@ -40,11 +39,11 @@ export default function HomePage() {
 
   const handleSearch = () => {
     if (!selectedTurfId) return;
-    navigate(`/turfs/${selectedTurfId}/book`, { state: { date, sport } });
+    navigate(`/turfs/${selectedTurfId}`, { state: { date, sport } });
   };
 
   const primaryCtaTarget = isAuthenticated
-    ? `/turfs/${selectedTurfId || (turfs[0]?.id ?? 1)}/book`
+    ? `/turfs/${selectedTurfId || (turfs[0]?.id ?? 1)}`
     : '/login';
 
   return (
@@ -208,66 +207,60 @@ export default function HomePage() {
             </button>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {FEATURED_TURFS.map((turf) => (
-              <div
-                key={turf.id}
-                className="group bg-surface-container-lowest rounded-[1.5rem] overflow-hidden shadow-ambient hover:-translate-y-1 transition-all duration-300"
-              >
-                <div className="relative h-64 overflow-hidden">
-                  <img
-                    alt=""
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                    src={turf.image}
-                  />
-                  <div className="absolute top-4 left-4 bg-surface/90 backdrop-blur-sm px-3 py-1 rounded-full flex items-center gap-1 shadow-sm">
-                    <span className="material-symbols-outlined text-tertiary text-sm fill">star</span>
-                    <span className="font-body font-semibold text-sm text-on-surface">
-                      {turf.rating}
-                    </span>
+          {turfs.length === 0 ? (
+            <div className="bg-surface-container-lowest rounded-xl p-12 text-center text-on-surface-variant">
+              {turfsError ? turfsError : 'Loading venues…'}
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {turfs.map((turf) => (
+                <div
+                  key={turf.id}
+                  className="group bg-surface-container-lowest rounded-[1.5rem] overflow-hidden shadow-ambient hover:-translate-y-1 transition-all duration-300"
+                >
+                  <div className="relative h-64 overflow-hidden bg-surface-container-low">
+                    {turf.coverImageUrl && (
+                      <img
+                        alt=""
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                        src={turf.coverImageUrl}
+                      />
+                    )}
                   </div>
-                  <div className="absolute top-4 right-4 px-3 py-1 rounded-full font-label text-xs font-bold tracking-wider bg-primary text-on-primary">
-                    AVAILABLE
-                  </div>
-                </div>
-                <div className="p-6">
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <h3 className="font-headline text-xl font-bold text-on-surface mb-1">
-                        {turf.name}
-                      </h3>
-                      <p className="font-body text-sm text-on-surface-variant flex items-center gap-1">
-                        <span className="material-symbols-outlined text-base">location_on</span>
-                        {turf.location}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <div className="font-headline font-bold text-lg text-primary">
-                        ₹{turf.price.toLocaleString('en-IN')}
+                  <div className="p-6">
+                    <div className="flex justify-between items-start mb-4">
+                      <div>
+                        <h3 className="font-headline text-xl font-bold text-on-surface mb-1">
+                          {turf.name}
+                        </h3>
+                        <p className="font-body text-sm text-on-surface-variant flex items-center gap-1">
+                          <span className="material-symbols-outlined text-base">location_on</span>
+                          {turf.address}
+                        </p>
                       </div>
-                      <div className="font-body text-xs text-on-surface-variant">per hour</div>
+                      <div className="text-right">
+                        <div className="font-headline font-bold text-lg text-primary">
+                          ₹{Number(turf.pricePerHour ?? 0).toLocaleString('en-IN')}
+                        </div>
+                        <div className="font-body text-xs text-on-surface-variant">per hour</div>
+                      </div>
                     </div>
+                    {turf.description && (
+                      <p className="font-body text-sm text-on-surface-variant mb-6 line-clamp-2">
+                        {turf.description}
+                      </p>
+                    )}
+                    <Link
+                      to={`/turfs/${turf.id}`}
+                      className="block text-center w-full font-headline font-semibold py-3 rounded-xl transition-colors bg-surface-container-high text-on-surface group-hover:bg-primary group-hover:text-on-primary"
+                    >
+                      Book Slot
+                    </Link>
                   </div>
-                  <div className="flex gap-2 mb-6">
-                    {turf.tags.map((tag) => (
-                      <span
-                        key={tag}
-                        className="bg-surface-container px-3 py-1 rounded-full font-body text-xs text-on-surface"
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                  <Link
-                    to={`/turfs/${turf.id}`}
-                    className="block text-center w-full font-headline font-semibold py-3 rounded-xl transition-colors bg-surface-container-high text-on-surface group-hover:bg-primary group-hover:text-on-primary"
-                  >
-                    Book Slot
-                  </Link>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
     </>
