@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { authService } from '../../services/authService.js';
 import { useAuth } from '../../hooks/useAuth.js';
-import { isValidPhone } from '../../utils/validators.js';
+import { isValid10DigitPhone } from '../../utils/validators.js';
+
+const stripCountryPrefix = (phone) => String(phone || '').replace(/^\+?91/, '').replace(/\D/g, '');
 
 export default function ProfileCompletionModal({ open, onClose, onComplete }) {
   const { user, updateUser } = useAuth();
   const [name, setName] = useState(user?.name || '');
-  const [phone, setPhone] = useState(user?.phone || '');
+  const [phone, setPhone] = useState(stripCountryPrefix(user?.phone));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -16,20 +18,22 @@ export default function ProfileCompletionModal({ open, onClose, onComplete }) {
     e.preventDefault();
     setError('');
     if (!name.trim()) return setError('Name is required');
-    if (!isValidPhone(phone)) return setError('Enter a valid phone number');
+    if (!isValid10DigitPhone(phone)) return setError('Enter a valid 10-digit phone number');
     if (!user?.email) return setError('You need to be logged in.');
+
+    const fullPhone = `+91${phone.trim()}`;
 
     try {
       setLoading(true);
       const res = await authService.completeProfile({
         email: user.email,
         name: name.trim(),
-        phone: phone.trim(),
+        phone: fullPhone,
       });
       if (res?.user) {
         updateUser(res.user);
       } else {
-        updateUser({ ...user, name: name.trim(), phone: phone.trim(), profileCompleted: true });
+        updateUser({ ...user, name: name.trim(), phone: fullPhone, profileCompleted: true });
       }
       if (onComplete) onComplete();
     } catch (err) {
@@ -76,7 +80,7 @@ export default function ProfileCompletionModal({ open, onClose, onComplete }) {
               autoComplete="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="John Doe"
+              placeholder="Priyanshu De"
               className="block w-full px-4 py-3 bg-surface-container-low rounded-xl border border-transparent focus:border-primary/40 text-on-surface font-body outline-none transition-colors"
             />
           </div>
@@ -88,15 +92,22 @@ export default function ProfileCompletionModal({ open, onClose, onComplete }) {
             >
               Phone Number
             </label>
-            <input
-              id="profile-phone"
-              type="tel"
-              autoComplete="tel"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder="+91 9876543210"
-              className="block w-full px-4 py-3 bg-surface-container-low rounded-xl border border-transparent focus:border-primary/40 text-on-surface font-body outline-none transition-colors"
-            />
+            <div className="flex items-stretch bg-surface-container-low rounded-xl border border-transparent focus-within:border-primary/40 transition-colors overflow-hidden">
+              <span className="flex items-center px-4 font-body text-on-surface-variant bg-surface-container select-none">
+                +91
+              </span>
+              <input
+                id="profile-phone"
+                type="tel"
+                inputMode="numeric"
+                autoComplete="tel-national"
+                maxLength={10}
+                value={phone}
+                onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                placeholder="9876543210"
+                className="flex-1 min-w-0 px-4 py-3 bg-transparent border-0 focus:ring-0 text-on-surface font-body outline-none"
+              />
+            </div>
           </div>
 
           {error && <p className="text-sm text-error">{error}</p>}

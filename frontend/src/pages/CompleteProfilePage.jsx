@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { authService } from '../services/authService.js';
 import { useAuth } from '../hooks/useAuth.js';
-import { isValidPhone } from '../utils/validators.js';
+import { isValid10DigitPhone } from '../utils/validators.js';
 
 export default function CompleteProfilePage() {
   const navigate = useNavigate();
@@ -19,10 +19,14 @@ export default function CompleteProfilePage() {
     e.preventDefault();
     setError('');
     if (!name.trim()) return setError('Name is required');
-    if (!isValidPhone(phone)) return setError('Enter a valid phone number');
+    if (!isValid10DigitPhone(phone)) return setError('Enter a valid 10-digit phone number');
     try {
       setLoading(true);
-      const res = await authService.completeProfile({ email, name, phone });
+      const res = await authService.completeProfile({
+        email,
+        name,
+        phone: `+91${phone.trim()}`,
+      });
       login(res.token, res.user);
       navigate('/dashboard');
     } catch (err) {
@@ -62,7 +66,7 @@ export default function CompleteProfilePage() {
                 autoComplete="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="John Doe"
+                placeholder="Priyanshu De"
                 required
                 className="block w-full pl-10 pr-3 py-3 text-base bg-surface-container-low rounded-lg border border-transparent focus:border-outline-variant/40 outline-none transition-all"
               />
@@ -76,20 +80,25 @@ export default function CompleteProfilePage() {
             >
               Phone Number
             </label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <span className="material-symbols-outlined text-outline-variant">phone_iphone</span>
-              </div>
+            <div className="flex items-stretch bg-surface-container-low rounded-lg border border-transparent focus-within:border-outline-variant/40 transition-all overflow-hidden">
+              <span className="flex items-center pl-3 text-outline-variant">
+                <span className="material-symbols-outlined">phone_iphone</span>
+              </span>
+              <span className="flex items-center px-3 font-body text-on-surface-variant select-none">
+                +91
+              </span>
               <input
                 id="phone-number"
                 name="phone"
                 type="tel"
-                autoComplete="tel"
+                inputMode="numeric"
+                autoComplete="tel-national"
+                maxLength={10}
                 value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="+91 9876543210"
+                onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                placeholder="9876543210"
                 required
-                className="block w-full pl-10 pr-3 py-3 text-base bg-surface-container-low rounded-lg border border-transparent focus:border-outline-variant/40 outline-none transition-all"
+                className="flex-1 min-w-0 pr-3 py-3 text-base bg-transparent border-0 focus:ring-0 outline-none"
               />
             </div>
             <p className="mt-2 text-xs text-on-surface-variant font-body">
