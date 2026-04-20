@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { bookingApi } from '../api/bookingApi.js';
 import { getTurfById } from '../features/turf/mockTurfs.js';
+import { todayLocalIso } from '../utils/dates.js';
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
@@ -45,7 +46,7 @@ export default function SlotBookingPage() {
       await bookingApi.create({
         turfId: Number(turfId),
         slotLabel: slot.time,
-        bookingDate: new Date().toISOString().slice(0, 10),
+        bookingDate: todayLocalIso(),
         amount: slot.price,
       });
       navigate('/my-bookings');

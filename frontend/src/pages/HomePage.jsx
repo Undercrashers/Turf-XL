@@ -2,8 +2,9 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { turfApi } from '../api/turfApi.js';
 import { useAuth } from '../hooks/useAuth.js';
+import { todayLocalIso } from '../utils/dates.js';
 
-const todayIso = () => new Date().toISOString().slice(0, 10);
+const todayIso = () => todayLocalIso();
 
 export default function HomePage() {
   const navigate = useNavigate();

@@ -19,7 +19,8 @@
       "Bash(MAIL_USERNAME=\"priyanshude219@gmail.com\" MAIL_PASSWORD=\"gfmowrqaqebosnjz\" mvn spring-boot:run)",
       "Bash(netstat -ano)",
       "Bash(taskkill *)",
-      "Bash(xxd)"
+      "Bash(xxd)",
+      "Bash(grep *)"
     ]
   }
 }

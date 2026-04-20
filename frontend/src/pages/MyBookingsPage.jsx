@@ -31,7 +31,7 @@ function bucketFor(booking) {
 }
 
 export default function MyBookingsPage() {
-  const [tab, setTab] = useState('upcoming');
+  const [tab, setTab] = useState('all');
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');

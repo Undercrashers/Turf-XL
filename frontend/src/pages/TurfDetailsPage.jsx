@@ -4,6 +4,7 @@ import { getTurfById } from '../features/turf/mockTurfs.js';
 import { bookingApi } from '../api/bookingApi.js';
 import { slotApi } from '../api/slotApi.js';
 import { useAuth } from '../hooks/useAuth.js';
+import { toLocalIsoDate, todayLocalIso } from '../utils/dates.js';
 
 const DAY_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const STANDARD_SLOTS = ['17:00', '18:00', '19:00', '20:00', '21:00', '22:00'];
@@ -15,7 +16,7 @@ function buildDateOptions(count = 4) {
     const d = new Date(today);
     d.setDate(d.getDate() + i);
     return {
-      iso: d.toISOString().slice(0, 10),
+      iso: toLocalIsoDate(d),
       label: i === 0 ? 'Today' : DAY_SHORT[d.getDay()],
       day: String(d.getDate()),
     };
@@ -47,7 +48,7 @@ export default function TurfDetailsPage() {
   const dateOptions = useMemo(() => buildDateOptions(4), []);
 
   const [selectedDate, setSelectedDate] = useState(dateOptions[0].iso);
-  const [selectedSlot, setSelectedSlot] = useState(STANDARD_SLOTS[1]);
+  const [selectedSlot, setSelectedSlot] = useState('');
   const [sport, setSport] = useState('football');
   const [bookedStartTimes, setBookedStartTimes] = useState(() => new Set());
   const [loadingSlots, setLoadingSlots] = useState(false);
@@ -56,6 +57,23 @@ export default function TurfDetailsPage() {
 
   const sportPricing = turf?.sportPricing ?? { football: turf?.price ?? 0 };
   const currentPrice = sportPricing[sport] ?? turf?.price ?? 0;
+
+  const isSlotPastForDate = useCallback(
+    (startHHmm) => {
+      if (selectedDate !== todayLocalIso()) return false;
+      const now = new Date();
+      const [h, m] = startHHmm.split(':').map((n) => parseInt(n, 10));
+      const slotDate = new Date();
+      slotDate.setHours(h, m, 0, 0);
+      return slotDate <= now;
+    },
+    [selectedDate]
+  );
+
+  const isSlotUnavailable = useCallback(
+    (startHHmm) => bookedStartTimes.has(startHHmm) || isSlotPastForDate(startHHmm),
+    [bookedStartTimes, isSlotPastForDate]
+  );
 
   const refreshSlots = useCallback(async () => {
     if (!turfId || !selectedDate) return;
@@ -78,6 +96,15 @@ export default function TurfDetailsPage() {
   useEffect(() => {
     refreshSlots();
   }, [refreshSlots]);
+
+  // Auto-pick the first actually-available slot whenever date or availability changes.
+  useEffect(() => {
+    const firstFree = STANDARD_SLOTS.find((s) => !isSlotUnavailable(s));
+    setSelectedSlot((prev) => {
+      if (prev && !isSlotUnavailable(prev)) return prev;
+      return firstFree ?? '';
+    });
+  }, [selectedDate, bookedStartTimes, isSlotUnavailable]);
 
   if (!turf) {
     return (
@@ -110,6 +137,10 @@ export default function TurfDetailsPage() {
     }
     if (bookedStartTimes.has(selectedSlot)) {
       setError('That slot is already booked. Please pick another.');
+      return;
+    }
+    if (isSlotPastForDate(selectedSlot)) {
+      setError('That slot time has already passed today. Pick a later time or another date.');
       return;
     }
     try {
@@ -276,16 +307,19 @@ export default function TurfDetailsPage() {
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   {STANDARD_SLOTS.map((start) => {
+                    const past = isSlotPastForDate(start);
                     const booked = bookedStartTimes.has(start);
+                    const unavailable = past || booked;
                     const active = selectedSlot === start;
                     return (
                       <button
                         key={start}
                         type="button"
-                        disabled={booked}
+                        disabled={unavailable}
                         onClick={() => setSelectedSlot(start)}
+                        title={past ? 'Time already passed' : booked ? 'Already booked' : ''}
                         className={`py-3 px-4 rounded-xl text-sm font-medium transition-colors border ${
-                          booked
+                          unavailable
                             ? 'bg-surface-container-high text-on-surface-variant opacity-50 cursor-not-allowed line-through border-transparent'
                             : active
                             ? 'bg-primary text-on-primary border-transparent'
@@ -304,7 +338,7 @@ export default function TurfDetailsPage() {
               <button
                 type="button"
                 onClick={handleBook}
-                disabled={submitting || !selectedSlot || bookedStartTimes.has(selectedSlot)}
+                disabled={submitting || !selectedSlot || isSlotUnavailable(selectedSlot)}
                 className="block text-center w-full py-4 rounded-xl bg-gradient-primary text-on-primary font-bold text-lg tracking-wide shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {submitting ? 'Booking…' : isAuthenticated ? 'Book Now' : 'Login to Book'}
