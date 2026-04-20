@@ -25,7 +25,9 @@ function formatTimeRange(startIso, endIso) {
 function bucketFor(booking) {
   if (booking.status === 'CANCELLED') return 'past';
   if (!booking.startTime) return 'upcoming';
-  return new Date(booking.startTime) >= new Date() ? 'upcoming' : 'past';
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
+  return new Date(booking.startTime) >= startOfToday ? 'upcoming' : 'past';
 }
 
 export default function MyBookingsPage() {

@@ -15,6 +15,7 @@ import com.turfmanagement.repository.TurfRepository;
 import com.turfmanagement.repository.UserRepository;
 import com.turfmanagement.service.BookingService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +26,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class BookingServiceImpl implements BookingService {
@@ -72,12 +74,17 @@ public class BookingServiceImpl implements BookingService {
                 .status(BookingStatus.CONFIRMED)
                 .build());
 
+        log.info("[BOOKING] Created booking id={} for userId={} turfId={} slot={}",
+                booking.getId(), user.getId(), turf.getId(), start);
         return bookingMapper.toDto(booking);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<BookingResponseDto> myBookings(Long userId) {
-        return bookingRepository.findAllByUserIdOrderByCreatedAtDesc(userId).stream()
+        List<Booking> all = bookingRepository.findAllByUserIdOrderByCreatedAtDesc(userId);
+        log.info("[BOOKING] myBookings(userId={}) → {} rows", userId, all.size());
+        return all.stream()
                 .map(bookingMapper::toDto)
                 .toList();
     }
