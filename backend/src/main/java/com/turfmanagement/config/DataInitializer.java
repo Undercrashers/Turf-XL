@@ -1,11 +1,15 @@
 package com.turfmanagement.config;
 
 import com.turfmanagement.entity.Turf;
+import com.turfmanagement.entity.User;
+import com.turfmanagement.enums.Role;
 import com.turfmanagement.repository.TurfRepository;
+import com.turfmanagement.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -18,10 +22,19 @@ import java.util.List;
 public class DataInitializer implements CommandLineRunner {
 
     private final TurfRepository turfRepository;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public void run(String... args) {
-        if (turfRepository.count() > 0) return;
+        List<Turf> turfs = seedTurfs();
+        seedAdmins(turfs);
+    }
+
+    private List<Turf> seedTurfs() {
+        if (turfRepository.count() > 0) {
+            return turfRepository.findAll();
+        }
 
         List<Turf> seeds = List.of(
                 Turf.builder()
@@ -53,7 +66,43 @@ public class DataInitializer implements CommandLineRunner {
                         .build()
         );
 
-        turfRepository.saveAll(seeds);
-        log.info("[DEV] Seeded {} turfs", seeds.size());
+        List<Turf> saved = turfRepository.saveAll(seeds);
+        log.info("[DEV] Seeded {} turfs", saved.size());
+        return saved;
+    }
+
+    private void seedAdmins(List<Turf> turfs) {
+        if (userRepository.findByEmail("super.admin@turfxl.com").isPresent()) return;
+
+        userRepository.save(User.builder()
+                .email("super.admin@turfxl.com")
+                .name("Super Admin")
+                .role(Role.SUPER_ADMIN)
+                .profileCompleted(true)
+                .active(true)
+                .passwordHash(passwordEncoder.encode("super123"))
+                .build());
+
+        String[] adminEmails = {
+                "salt.admin@turfxl.com",
+                "elite.admin@turfxl.com",
+                "park.admin@turfxl.com",
+        };
+        String[] adminNames = {"Salt Lake Admin", "Elite Sports Admin", "Park Circus Admin"};
+
+        for (int i = 0; i < turfs.size() && i < adminEmails.length; i++) {
+            Turf t = turfs.get(i);
+            userRepository.save(User.builder()
+                    .email(adminEmails[i])
+                    .name(adminNames[i])
+                    .role(Role.ADMIN)
+                    .profileCompleted(true)
+                    .active(true)
+                    .passwordHash(passwordEncoder.encode("admin123"))
+                    .managedTurfId(t.getId())
+                    .build());
+        }
+
+        log.info("[DEV] Seeded 1 super admin + {} field admins", turfs.size());
     }
 }

@@ -34,4 +34,8 @@ public class User extends BaseEntity {
 
     @Column(nullable = false)
     private boolean active = true;
+
+    private String passwordHash;
+
+    private Long managedTurfId;
 }

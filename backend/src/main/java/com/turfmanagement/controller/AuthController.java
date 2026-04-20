@@ -1,5 +1,6 @@
 package com.turfmanagement.controller;
 
+import com.turfmanagement.dto.request.AdminLoginDto;
 import com.turfmanagement.dto.request.CompleteProfileDto;
 import com.turfmanagement.dto.request.OtpRequestDto;
 import com.turfmanagement.dto.request.OtpVerifyDto;
@@ -36,6 +37,11 @@ public class AuthController {
     @PostMapping("/complete-profile")
     public ApiResponse<AuthResponseDto> completeProfile(@Valid @RequestBody CompleteProfileDto dto) {
         return ApiResponse.ok(authService.completeProfile(dto));
+    }
+
+    @PostMapping("/admin-login")
+    public ApiResponse<AuthResponseDto> adminLogin(@Valid @RequestBody AdminLoginDto dto) {
+        return ApiResponse.ok(authService.adminLogin(dto));
     }
 
     @GetMapping("/me")

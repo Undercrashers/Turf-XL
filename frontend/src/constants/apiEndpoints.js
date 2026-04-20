@@ -3,6 +3,7 @@ export const API_ENDPOINTS = {
     REQUEST_OTP: '/auth/request-otp',
     VERIFY_OTP: '/auth/verify-otp',
     COMPLETE_PROFILE: '/auth/complete-profile',
+    ADMIN_LOGIN: '/auth/admin-login',
     ME: '/auth/me',
     LOGOUT: '/auth/logout',
   },
@@ -23,5 +24,6 @@ export const API_ENDPOINTS = {
   },
   ADMIN: {
     DASHBOARD: '/admin/dashboard',
+    BOOKINGS: '/admin/bookings',
   },
 };

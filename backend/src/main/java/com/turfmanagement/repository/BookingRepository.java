@@ -12,5 +12,9 @@ import java.util.List;
 public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findAllByUserIdOrderByCreatedAtDesc(Long userId);
 
+    List<Booking> findAllByTurfIdOrderByCreatedAtDesc(Long turfId);
+
+    List<Booking> findAllByOrderByCreatedAtDesc();
+
     boolean existsByTurfIdAndSlot_StartTimeAndStatus(Long turfId, LocalDateTime startTime, BookingStatus status);
 }

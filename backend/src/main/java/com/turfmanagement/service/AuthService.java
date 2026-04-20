@@ -1,5 +1,6 @@
 package com.turfmanagement.service;
 
+import com.turfmanagement.dto.request.AdminLoginDto;
 import com.turfmanagement.dto.request.CompleteProfileDto;
 import com.turfmanagement.dto.request.OtpRequestDto;
 import com.turfmanagement.dto.request.OtpVerifyDto;
@@ -12,4 +13,6 @@ public interface AuthService {
     AuthResponseDto verifyOtp(OtpVerifyDto dto);
 
     AuthResponseDto completeProfile(CompleteProfileDto dto);
+
+    AuthResponseDto adminLogin(AdminLoginDto dto);
 }

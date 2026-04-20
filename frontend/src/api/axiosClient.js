@@ -26,8 +26,11 @@ axiosClient.interceptors.response.use(
     if (status === 401 || status === 403) {
       localStorage.removeItem(STORAGE_KEYS.TOKEN);
       localStorage.removeItem(STORAGE_KEYS.USER);
-      if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
-        window.location.assign('/login');
+      if (typeof window !== 'undefined') {
+        const path = window.location.pathname;
+        const isAdminArea = path.startsWith('/admin');
+        const target = isAdminArea ? '/admin/login' : '/login';
+        if (path !== target) window.location.assign(target);
       }
     }
     return Promise.reject(error);

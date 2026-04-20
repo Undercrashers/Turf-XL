@@ -1,5 +1,6 @@
 package com.turfmanagement.service.impl;
 
+import com.turfmanagement.dto.request.AdminLoginDto;
 import com.turfmanagement.dto.request.CompleteProfileDto;
 import com.turfmanagement.dto.request.OtpRequestDto;
 import com.turfmanagement.dto.request.OtpVerifyDto;
@@ -15,6 +16,7 @@ import com.turfmanagement.security.JwtService;
 import com.turfmanagement.service.AuthService;
 import com.turfmanagement.service.OtpService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +28,7 @@ public class AuthServiceImpl implements AuthService {
     private final OtpService otpService;
     private final JwtService jwtService;
     private final UserMapper userMapper;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public void requestOtp(OtpRequestDto dto) {
@@ -74,6 +77,26 @@ public class AuthServiceImpl implements AuthService {
         user.setPhone(dto.getPhone());
         user.setProfileCompleted(true);
         userRepository.save(user);
+
+        return AuthResponseDto.builder()
+                .token(jwtService.generateToken(user))
+                .isNewUser(false)
+                .user(toUserDto(user))
+                .build();
+    }
+
+    @Override
+    public AuthResponseDto adminLogin(AdminLoginDto dto) {
+        User user = userRepository.findByEmail(dto.getEmail())
+                .orElseThrow(() -> new BadRequestException("Invalid credentials"));
+
+        if (user.getRole() != Role.ADMIN && user.getRole() != Role.SUPER_ADMIN) {
+            throw new BadRequestException("Not an admin account");
+        }
+        if (user.getPasswordHash() == null
+                || !passwordEncoder.matches(dto.getPassword(), user.getPasswordHash())) {
+            throw new BadRequestException("Invalid credentials");
+        }
 
         return AuthResponseDto.builder()
                 .token(jwtService.generateToken(user))
